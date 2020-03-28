@@ -1,4 +1,4 @@
-# Set of useful scripts for system administrators 👨‍💻 👩‍💻
+# Set of useful scripts for system administrators  👽 
 
 ### SSL
   - [Show how many time days Server Certificate will expire](https://github.com/teymurgahramanov/Useful-scripts-for-sysadmins/blob/master/openssl_server_crt_days_until_expire)
