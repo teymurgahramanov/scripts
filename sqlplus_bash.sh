@@ -1,6 +1,8 @@
 #!/bin/bash
 
-export ORACLE_HOME=# Path to sqplus directory
+# Download Oracle SQLPlus
+
+export ORACLE_HOME=# Path to Oracle SQLPlus directory
 export LD_LIBRARY_PATH=$ORACLE_HOME/lib
 export PATH=$PATH:$ORACLE_HOME/bin
 
