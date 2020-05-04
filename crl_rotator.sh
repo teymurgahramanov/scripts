@@ -17,18 +17,18 @@ do
 
         wget -q -O /tmp/$K.crl "$CRL_URL"
 
-        if [[ $? -ne 0 ]];
+        if [ $? -ne 0 ];
         then
                 echo $date "wget error" >>  /tmp/crl.log
                 exit 1
         fi
 
-		#Check if CRL updated
-    NEW_CRL_VERSION="$(openssl crl -inform der -in /tmp/$K.crl -crlnumber -noout | cut -d= -f2)"
+    	#Check if CRL updated
+    	NEW_CRL_VERSION="$(openssl crl -inform der -in /tmp/$K.crl -crlnumber -noout | cut -d= -f2)"
 
-    #Check version of currently used CRL
-		if [ -f $CRL_STATUS_FILE ];
-		then
+    	#Check version of currently used CRL
+    	if [ -f $CRL_STATUS_FILE ];
+	then
                 LAST_CRL_VERSION=$(cat $CRL_STATUS_FILE)
         else
                 LAST_CRL_VERSION=0
