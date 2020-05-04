@@ -1,4 +1,4 @@
-# Set of useful scripts for system administrators  👽 
+# My useful scripts  👽 
 
 ### Active Directory
   - [Disable and move inactive users and computers and remove empty groups in Active Directory](https://github.com/teymurgahramanov/Useful-scripts-for-sysadmins/blob/master/ad-cleaner.ps1)
