@@ -5,9 +5,7 @@ declare -A SOURCES
 OWNER_USER=apache
 OWNER_GROUP=apache
 
-SOURCES=(\
-        ["CRL_SOURCE_1_NAME"]="CRL_SOURCE_1_URL" \
-)
+declare -A SOURCES=(["CRL_SOURCE_1_NAME"]="CRL_SOURCE_1_URL")
 
 for K in "${!SOURCES[@]}";
 do
