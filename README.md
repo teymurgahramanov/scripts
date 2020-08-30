@@ -8,3 +8,6 @@
   
 ### SQL
   - [Run SQL Code for Oracle from Bash](https://github.com/teymurgahramanov/Useful-scripts-for-sysadmins/blob/master/sqlplus_bash.sh)
+  
+### Other
+   - [Send message from bash to telegram bot](https://github.com/teymurgahramanov/scripts/blob/master/send_msg_bash_telegram.sh)
