@@ -17,9 +17,9 @@ CRL_INFO_FILE="$CRL_DIR"/info.txt # for errors
 echo -n > $CRL_INFO_FILE
 
 declare -A SOURCES=( \
-	["bsxm_azroot"]="http://asxm.e-imza.az/cdp/AZ%20Root%20Authority%20(RCA).crl" \
-	["bsxm_azpolicy"]="http://asxm.e-imza.az/cdp/AZ%20Policy%20Authority%20(PCA).crl" \
-	["bsxm_ca"]="http://bsxm.cbar.az/crl/armbbsxm.crl" \
+	["source1"]="URL1" \
+	["source2"]="URL2" \
+	["source3"]="URL3" \
 	)
 
 ARGUMENTS=("$@")
