@@ -11,8 +11,8 @@ SOFTWARE=haproxy
 CRL_OWNER_USER=haproxy 
 CRL_OWNER_GROUP=haproxy
 CRL_GROUP="${@: -1}"
-CRL_PATH="/etc/haproxy/ssl/crl" 
-CRL_INFO_FILE="$CRL_PATH"/info.txt # for errors 
+CRL_DIR="/etc/haproxy/ssl/crl" 
+CRL_INFO_FILE="$CRL_DIR"/info.txt # for errors 
 
 echo -n > $CRL_INFO_FILE
 
@@ -30,14 +30,14 @@ do
 if [ "${ARGUMENTS[$A]}" != "$CRL_GROUP" ]; then
 	
 	CRL_URL=${SOURCES[${ARGUMENTS[$A]}]}
-	CRL_FILE="$CRL_PATH/${ARGUMENTS[$A]}.crl"
-	CRL_STATUS_FILE="$CRL_PATH"/"${ARGUMENTS[$A]}".crl.status
-	CRL_COMBO_FILE="$CRL_PATH"/"$CRL_GROUP"_combo.crl
+	CRL_FILE="$CRL_DIR/${ARGUMENTS[$A]}.crl"
+	CRL_STATUS_FILE="$CRL_DIR"/"${ARGUMENTS[$A]}".crl.status
+	CRL_COMBO_FILE="$CRL_DIR"/"$CRL_GROUP"_combo.crl
 	TMP_CRL_FILE=/tmp/${ARGUMENTS[$A]}.crl
 	TMP_CRL_COMBO_FILE=/tmp/"$CRL_GROUP"_combo.crl
 
-	if [ ! -d $CRL_PATH ]; then
-		echo "No such path $CRL_PATH"
+	if [ ! -d $CRL_DIR ]; then
+		echo "No such path $CRL_DIR"
 		exit 1
 	fi
 
