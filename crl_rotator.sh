@@ -41,7 +41,7 @@ if [ "${ARGUMENTS[$A]}" != "$CRL_GROUP" ]; then
 		exit 1
 	fi
 
-	curl "$CRL_URL" --output $TMP_CRL_FILE --silent
+	curl "$CRL_URL" --output $TMP_CRL_FILE -m 5 --silent
 	if [ $? == 0 ]; then
 		#Check if CRL in PEM format
 		openssl crl -in $TMP_CRL_FILE -noout > /dev/null 2>&1
