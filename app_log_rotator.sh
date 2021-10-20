@@ -1,5 +1,4 @@
-# Script for rotating Application logs located under /Log
-
+# Script for rotating logs of multiple Application instances on multiple servers
 ARRAY_APP=($(ls -l /App | grep -v total | awk -F " " '{print $9}'))
 PATTERN=*.log.*
 GET_DATE_LAST_MODIFIED="stat -c %y"
