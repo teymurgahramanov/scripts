@@ -1,5 +1,6 @@
 #!/bin/bash
-# Assume that you have two servers: apptestsrv1 and appprodsrv2. Each server contains directories /App/FooApp,/App/BarApp. Developers tested apps apptestsrv1 and tell you that packages are ready to be deployed on production. So, you use this script to deliver packages from test to prod.
+# Assume that you have two servers: apptestsrv1 and appprodsrv2. Each server contains directories /App/FooApp,/App/BarApp. 
+# Developers tested apps apptestsrv1 and tell you that packages are ready to be deployed on production. So, you use this script to deliver packages from test to prod.
 # Create alias: alias kuryer="sudo -u deploy FILE_LOCK_OWNER=$(whoami) bash /Workdir/Scripts/kuryer.sh"
 
 exec 2> /dev/null
