@@ -13,3 +13,4 @@
    - [Send message from bash to telegram bot](https://github.com/teymurgahramanov/scripts/blob/master/send_msg_bash_telegram.sh)
    - [JSON Generator](https://github.com/teymurgahramanov/scripts/blob/master/json-generator.sh)
    - [Application log rotator](https://github.com/teymurgahramanov/scripts/blob/master/app_log_rotator.sh)
+   - [Kuryer - Bash script for delivering Java packages from dev environment to production. Not an universal solution but contains interesting bash scripting technics.](.)
