@@ -12,3 +12,4 @@
 ### Other
    - [Send message from bash to telegram bot](https://github.com/teymurgahramanov/scripts/blob/master/send_msg_bash_telegram.sh)
    - [JSON Generator](https://github.com/teymurgahramanov/scripts/blob/master/json-generator.sh)
+   - [Application log rotator](https://github.com/teymurgahramanov/scripts/blob/master/app_log_rotator.sh)
