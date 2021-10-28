@@ -3,12 +3,15 @@
 ARRAY_APP=($(ls -l /App | grep -v total | awk -F " " '{print $9}'))
 PATTERN=*.log.*
 GET_DATE_LAST_MODIFIED="stat -c %y"
-COMPRESSION="gzip -9 --suffix .z"
+COMPRESSION_SUFFIX='.z'
+COMPRESSION="gzip -9 --suffix $COMPRESSION_SUFFIX"
 
 for i in ${!ARRAY_APP[@]};
 do
         DIR_LOG=/Log/${ARRAY_APP[$i]}
         DIR_LOG_BACKUP=/mnt/LOGBACKUP/${ARRAY_APP[$i]}/$(hostname)
+        USER=$(stat -c '%U' $DIR_LOG)
+        GROUP=$(stat -c '%G' $DIR_LOG)
 
                 find $DIR_LOG -mindepth 1 -type f ! -name '*.log' -mtime +30 -delete
                 find $DIR_LOG -mindepth 1 -empty -type d -delete
@@ -21,25 +24,30 @@ do
                         for d in ${!ARRAY_MODIFY_DATE[@]}; do
                         if [ ! -d $DIR_LOG_BACKUP ]; then
                                 mkdir $DIR_LOG_BACKUP
+				chown $USER:$GROUP $DIR_LOG_BACKUP
                         fi
                         if [ ! -d $DIR_LOG/${ARRAY_MODIFY_DATE[$d]} ]; then
                                 mkdir $DIR_LOG/${ARRAY_MODIFY_DATE[$d]}
+                                chown $USER:$GROUP $DIR_LOG/${ARRAY_MODIFY_DATE[$d]}
                         fi
                         if [ ! -d $DIR_LOG_BACKUP/${ARRAY_MODIFY_DATE[$d]} ]; then
                                 mkdir $DIR_LOG_BACKUP/${ARRAY_MODIFY_DATE[$d]}
+                                chown $USER:$GROUP $DIR_LOG_BACKUP/${ARRAY_MODIFY_DATE[$d]}
                         fi
                         done
 
                         for f in $DIR_LOG/$PATTERN; do
                                 FILE_MODIFY_DATE=$($GET_DATE_LAST_MODIFIED $f | cut -d " " -f 1)
                                 if [[ "${ARRAY_MODIFY_DATE[*]}" =~ (^|[[:space:]])"$FILE_MODIFY_DATE"($|[[:space:]]) ]]; then
-                                        mv --backup=existing $f $DIR_LOG/$FILE_MODIFY_DATE
+					$COMPRESSION $f 2> /dev/null
+					chown $USER:$GROUP $f$COMPRESSION_SUFFIX
+                                        chmod 440 $f$COMPRESSION_SUFFIX
+                                        mv --backup=existing $f$COMPRESSION_SUFFIX $DIR_LOG/$FILE_MODIFY_DATE
                                 fi
                         done
 
                         for d in ${!ARRAY_MODIFY_DATE[@]}; do
-                                $COMPRESSION $DIR_LOG/${ARRAY_MODIFY_DATE[$d]}/$PATTERN 2> /dev/null
-                                cp -u $DIR_LOG/${ARRAY_MODIFY_DATE[$d]}/* $DIR_LOG_BACKUP/${ARRAY_MODIFY_DATE[$d]}
+                                cp -up $DIR_LOG/${ARRAY_MODIFY_DATE[$d]}/* $DIR_LOG_BACKUP/${ARRAY_MODIFY_DATE[$d]}
                                 SIZE_LOCAL=$(du -cb $DIR_LOG/${ARRAY_MODIFY_DATE[$d]}/* | tail -1 | awk -F " " '{print $1}')
                                 SIZE_BACKUP=$(du -cb $DIR_LOG_BACKUP/${ARRAY_MODIFY_DATE[$d]}/* | tail -1 | awk -F " " '{print $1}')
                                 if [ $SIZE_LOCAL != $SIZE_BACKUP ]; then
