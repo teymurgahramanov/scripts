@@ -1,0 +1,20 @@
+# Example of changing connection user password and connection port during playbook.
+# May be helpful on provisioning.
+
+- name: Generate root password
+  set_fact:
+    root_password: "{{ lookup('password', '/dev/null length=12 chars=ascii_lowercase,ascii_uppercase,digits,punctuation') }}"
+
+- name: Generate new SSH port number
+  set_fact:
+    ssh_port: "42{{ lookup('password', '/dev/null length=3 chars=digits') }}"
+
+- name: Reset root password
+  user:
+    name: root
+    password: "{{ root_password | password_hash('sha512') }}"
+
+- name: Renew ansible SSH passowrd
+  connection: local
+  set_fact:
+    ansible_password: "{{ root_password }}"

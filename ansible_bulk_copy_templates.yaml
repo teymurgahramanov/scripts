@@ -1,0 +1,58 @@
+- name: Find directory structure of templated config files of approriate Application
+  find:
+    paths: "{{ role_path }}/templates/conf/{{ app_name }}"
+    recurse: yes
+    file_type: directory
+  delegate_to: localhost
+  register: find_directory_result
+  tags:
+    - create
+
+- name: Find templated config files of approriate Application
+  find:
+    paths: "{{ role_path }}/templates/conf/{{ app_name }}"
+    recurse: yes
+    patterns: '*.j2'
+    file_type: file
+  delegate_to: localhost
+  register: find_template_result
+  tags:
+    - create
+
+- name: Find other files of approriate Application beside configs
+  find:
+    paths: "{{ role_path }}/templates/conf/{{ app_name }}"
+    recurse: yes
+    excludes: '*.j2'
+    file_type: file
+  delegate_to: localhost
+  register: find_other_result
+  tags:
+    - create
+
+- name: Create directory structure of config files on target
+  file:
+    path: "{{ structure.app.conf }}{{ item.path | regex_replace(role_path + '/templates/conf/' + app_name,'') }}"
+    state: directory
+  with_items:
+    - "{{ find_directory_result.files }}"
+  tags:
+    - create
+
+- name: Copy config templates to target and remove j2 extension from them
+  template:
+    src: "{{ item.path }}"
+    dest: "{{ structure.app.conf }}{{ item.path | regex_replace(role_path + '/templates/conf/' + app_name,'') | regex_replace('\\.j2$','') }}"
+  with_items:
+    - "{{ find_template_result.files }}"
+  tags:
+    - create
+
+- name: Copy other files
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ structure.app.conf }}{{ item.path | regex_replace(role_path + '/templates/conf/' + app_name,'') }}"
+  with_items:
+    - "{{ find_other_result.files }}"
+  tags:
+    - create

@@ -1,0 +1,17 @@
+# Example of handler for reload and check systemd service.
+
+- name: Reload Apache
+  service:
+    name: httpd
+    state: reloaded
+    enabled: yes
+  notify:
+    - Get service facts
+    - Check Apache status
+
+- name: Get service facts
+  service_facts:
+
+- name: Check Apache status
+  debug:
+    var: ansible_facts.services['httpd.service'].state

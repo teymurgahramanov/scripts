@@ -1,0 +1,159 @@
+---
+
+- name: Init
+  hosts: init
+  become: no
+  gather_facts: yes
+  remote_user: root
+  ignore_errors: yes
+  vars_files:
+    - "/ansible/inventories/{{ inv_env }}/group_vars/{{ inv_env }}_{{ inv_loc }}.yml"
+    - "/ansible/inventories/{{ inv_env }}/group_vars/{{ inv_env }}.yml"
+
+  tasks:
+
+    - name: Set hostname
+      hostname:
+        name: "{{ hostname }}"
+
+    #- name: Include common role
+    #  include_role:
+    #    name: common
+
+    - name: Allow root login during initialization
+      lineinfile:
+        dest: "/etc/ssh/sshd_config"
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin yes"
+
+    - name: Run common handlers
+      meta: flush_handlers
+
+    - name: Gather new facts
+      setup:
+        filter: "{{ item }}"
+      with_items:
+        - "ansible_hostname"
+        - "ansible_fqdn"
+
+    - name: Join IPA
+      command: "ipa-client-install -U -p {{ ipa_user }} -w {{ ipa_pass }} --force-join --no-sshd --no-ntp --mkhomedir"
+      when: join_ipa == "yes"
+      ignore_errors: no
+       
+    - name: Generate root password
+      set_fact:
+        root_password: "{{ lookup('password', '/dev/null length=12 chars=ascii_lowercase,ascii_uppercase,digits') }}"
+
+    - name: Generate user name
+      set_fact:
+        user_name: "{{ lookup('password', '/dev/null length=6 chars=ascii_lowercase,ascii_uppercase') }}"
+
+    - name: Generate user password
+      set_fact:
+        user_password: "{{ lookup('password', '/dev/null length=12 chars=ascii_lowercase,ascii_uppercase,digits,punctuation') }}"
+
+    - name: Generate new SSH port number
+      set_fact:
+        ssh_port: "42{{ lookup('password', '/dev/null length=3 chars=digits') }}"
+ 
+    - name: Reset root password
+      user:
+        name: root
+        password: "{{ root_password | password_hash('sha512') }}"
+
+    - name: Renew ansible SSH passowrd
+      connection: local
+      set_fact:
+        ansible_password: "{{ root_password }}"
+
+    - name: Create user and set password
+      user:
+        name: "{{ user_name }}"
+        state: present
+        password: "{{ user_password | password_hash('sha512') }}"
+        
+    - name: Set new SSH port number in sshd config
+      lineinfile:
+        dest: "/etc/ssh/sshd_config"
+        regexp: "^Port"
+        line: "Port {{ ssh_port }}"
+
+    - name: Set new SSH port number in SELinux
+      seport:
+        ports: "{{ ssh_port }}"
+        proto: tcp
+        setype: "ssh_port_t"
+        state: "present"
+
+    - name: Get firewalld services
+      command: "firewall-cmd --list-services"
+      register: firewalld_services
+
+    - name: Get firewalld ports
+      command: "firewall-cmd --list-ports"
+      register: firewalld_ports
+
+    - name: Remove default firewalld services
+      firewalld:
+        service: "{{ item }}"
+        state: disabled
+        permanent: true
+      with_items:
+         - "{{ firewalld_services.stdout.split(' ') }}"
+
+    - name: Remove default firewalld ports
+      firewalld:
+        port: "{{ item }}"
+        state: disabled
+        permanent: true
+      with_items:
+         - "{{ firewalld_ports.stdout.split(' ') }}"
+
+    - name: Add new SSH port number to firewalld
+      firewalld:
+        port: "{{ ssh_port }}/tcp"
+        state: enabled
+        permanent: true
+
+    - name: Truncate previous report
+      copy:
+        content: ""
+        dest: "/ansible/reports/{{ ansible_fqdn }}"
+        force: yes
+      delegate_to: localhost
+
+    - name: Generate report
+      lineinfile:
+        dest: "/ansible/reports/{{ ansible_fqdn }}"
+        line: "{{ item }}"
+        insertafter: EOF
+      with_items:
+        - "INIT_TIME: {{ ansible_date_time.iso8601 }}"
+        - "HOSTNAME: {{ ansible_fqdn }}"
+        - "IP: {{ ansible_default_ipv4.address }}"
+        - "SSH_PORT: {{ ssh_port }}"
+        - "ROOT_PASSWORD: {{ root_password }}"
+        - "USER: {{ user_name }}"
+        - "USER_PASSWORD: {{ user_password }}"
+      delegate_to: localhost
+
+    - name: Apply role if defined
+      include_role:
+        name: "{{ inv_role }}"
+      when: inv_role is defined
+      ignore_errors: yes
+
+    - name: Run common handlers
+      meta: flush_handlers
+
+    - name: Disable root login
+      lineinfile:
+        dest: "/etc/ssh/sshd_config"
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+
+    - name: Reboot server
+      shell: sleep 5 && reboot
+      async: 3
+      poll: 0
